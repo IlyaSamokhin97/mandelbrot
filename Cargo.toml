@@ -11,16 +11,3 @@ anyhow = "1.0.68"
 num = "0.4"
 itertools = "0.10"
 rayon = "1.6"
-
-[dev-dependencies]
-criterion = "0.4"
-
-[profile.release]
-debug = true
-
-[profile.bench]
-debug = true
-
-[[bench]]
-name = "bench"
-harness = false

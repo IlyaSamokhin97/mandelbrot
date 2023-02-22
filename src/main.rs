@@ -1,5 +1,6 @@
-use mandelbrot::*;
+use std::iter::successors;
 
+use num::complex::Complex64;
 use rayon::prelude::*;
 
 fn main() -> anyhow::Result<()> {
@@ -80,4 +81,13 @@ fn move_vector(input: &lume::Input) -> Option<Complex64> {
         (true , false, false, false) => Some(Complex64::new(-1.0,  0.0)),
         _ => None,
     }
+}
+
+pub fn mandelbrot(c: Complex64, precision: usize) -> usize {
+    successors(Some(c), |z| Some(z*z + c))
+        .enumerate()
+        .take(precision)
+        .find(|(_, z)| z.norm_sqr() > 4.0)
+        .map(|(i, _)| i)
+        .unwrap_or(precision)
 }
