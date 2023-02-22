@@ -26,13 +26,7 @@ impl lume::Data for Data {
 
         let changes: Vec<_> = (0..height).into_par_iter().flat_map(|y| (0..width).into_par_iter().map(move |x| (y, x)))
             .map(|(y, x)| {
-                let xf = x as f64;
-                let yf = y as f64;
-
-                let c = Complex64::new(
-                    range_map(xf, [0.0, width as _], [self.center.re - 1.0, self.center.re + 1.0]),
-                    range_map(yf, [0.0, width as _], [self.center.im - 1.0, self.center.im + 1.0]),
-                );
+                let c = screen_to_complex((y, x), width, self);
 
                 let result = mandelbrot(c, precision);
                 let color = iterations_to_color(result, precision);
@@ -43,6 +37,13 @@ impl lume::Data for Data {
             raw_canvas[i] = c;
         }
     }
+}
+
+fn screen_to_complex((y, x): (usize, usize), width: usize, data: &Data) -> Complex64 {
+    Complex64::new(
+        range_map(x as _, [0.0, width as _], [data.center.re - 1.0, data.center.re + 1.0]),
+        range_map(y as _, [0.0, width as _], [data.center.im - 1.0, data.center.im + 1.0]),
+    )
 }
 
 fn range_map(n: f64, [sb, se]: [f64; 2], [db, de]: [f64; 2]) -> f64 {
