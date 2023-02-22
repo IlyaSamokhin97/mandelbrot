@@ -21,16 +21,13 @@ impl lume::Data for Data {
             self.center += mov * dt;
         }
 
-        dbg!(dt.recip());
-        dbg!(rayon::current_num_threads());
-
         let height = raw_canvas.height();
         let width = raw_canvas.width();
 
-        let changes = (0..height).into_par_iter().flat_map(|y| (0..width).into_par_iter().map(move |x| (y, x)))
+        let changes: Vec<_> = (0..height).into_par_iter().flat_map(|y| (0..width).into_par_iter().map(move |x| (y, x)))
             .map(|(y, x)| {
-                let xf: f64 = x as _;
-                let yf: f64 = y as _;
+                let xf = x as f64;
+                let yf = y as f64;
 
                 let c = Complex64::new(
                     range_map(xf, [0.0, width as _], [self.center.re - 1.0, self.center.re + 1.0]),
@@ -41,7 +38,7 @@ impl lume::Data for Data {
                 let color = iterations_to_color(result, precision);
                 (y*width + x, color)
             })
-            .collect::<Vec<_>>();
+            .collect();
         for (i, c) in changes {
             raw_canvas[i] = c;
         }
