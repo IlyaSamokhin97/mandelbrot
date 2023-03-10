@@ -1,4 +1,4 @@
-use std::iter::successors;
+use std::{iter::successors};
 
 use num::complex::Complex64;
 use rayon::prelude::*;
@@ -35,6 +35,56 @@ impl lume::Data for Data {
             .collect();
         for (i, c) in changes {
             raw_canvas[i] = c;
+        }
+
+        let (y, x) = (
+            input.mouse.y,
+            input.mouse.x,
+        );
+        let len: usize = 10;
+
+        line(raw_canvas, [[y                      , x.saturating_sub(len/2)], [y        , x + len/2]]);
+        line(raw_canvas, [[y.saturating_sub(len/2), x                      ], [y + len/2, x        ]]);
+    }
+}
+
+fn line(canvas: &mut dyn lume::RawCanvas, ps: [[usize; 2]; 2]) {
+    let ps = if ps[0][1] > ps[1][1] {
+        [ps[1], ps[0]]
+    } else {
+        ps
+    };
+
+    let [[y0,x0], [y1,x1]] = ps;
+
+    let height = canvas.height();
+    let width = canvas.width();
+    if x0 != x1 {
+        // y = (y1 - y0)/(x1 - x0) * x + y0
+
+        let slope = (y1 - y0) / (x1 - x0);
+        for x in x0..=x1 {
+            let y = slope * x + y0;
+            if x < width && y < height {
+                let px = &mut canvas[y*width + x];
+                if *px == 0xFFFF_FFFF {
+                    *px = 0xFF00_0000;
+                } else {
+                    *px = 0xFFFF_FFFF;
+                }
+            }
+        }
+    } else {
+        let x = x0;
+        for y in y0..=y1 {
+            if x < width && y < height {
+                let px = &mut canvas[y*width + x];
+                if *px == 0xFFFF_FFFF {
+                    *px = 0xFF00_0000;
+                } else {
+                    *px = 0xFFFF_FFFF;
+                }
+            }
         }
     }
 }
